@@ -1,0 +1,24 @@
+
+
+### Terraform ###
+.terraform.lock.hcl
+backend.tf
+
+# Local .terraform directories
+**/.terraform/*
+**/.terragrunt-cache/*
+# .tfstate files
+*.tfstate
+*.tfstate.*
+**/.terraform
+*.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+.terragrunt-cache
+.terraform.lock.hcl
+creds
