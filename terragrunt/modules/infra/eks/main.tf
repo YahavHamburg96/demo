@@ -33,7 +33,9 @@ module "eks_al2023" {
       # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
       instance_types = ["${var.instance_type}"]  # Free-tier eligible size
       ami_type       = "AL2_x86_64"
-
+      iam_role_additional_policies = {
+         "AmazonEBSCSIDriverPolicy" = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+      }
       desired_size = var.node_group_desired_size
       max_size     = var.node_group_max_size
       min_size     = var.node_group_min_size
@@ -50,6 +52,9 @@ module "eks_al2023" {
       subnet_ids   = var.private_subnet_ids
       labels = {
         "airflow" = "true"
+      }
+      iam_role_additional_policies = {
+         "AmazonEBSCSIDriverPolicy" = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
       }
       taints = {
         dedicated = {

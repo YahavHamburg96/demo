@@ -9,8 +9,7 @@ locals {
 
 inputs = {
   project                  = local.environment_vars.locals.project_name
-  private_subnet_a         = dependency.subnets.outputs.private_subnet_a
-  private_subnet_b         = dependency.subnets.outputs.private_subnet_b
+  private_subnet_ids       = dependency.subnets.outputs.private_subnet_ids
   aws_vpc_id               = dependency.vpc.outputs.vpc_id
   aws_account_id          = local.environment_vars.locals.aws_account_id
 }

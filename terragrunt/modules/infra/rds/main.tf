@@ -63,8 +63,8 @@ resource "aws_db_subnet_group" "default" {
 resource "aws_db_instance" "postgres" {
   allocated_storage      = 20
   engine                 = "postgres"
-  engine_version         = "17.4"
-  instance_class         = "db.t3.micro"   # Free tier eligible
+  engine_version         = var.engine_version
+  instance_class         = var.instance_class   # Free tier eligible
   identifier             = "${var.project}-postgres-db"
   username               = local.db_secret.username
   password               = local.db_secret.password
@@ -77,3 +77,4 @@ resource "aws_db_instance" "postgres" {
   multi_az                = false
   storage_type            = "gp2"
 }
+

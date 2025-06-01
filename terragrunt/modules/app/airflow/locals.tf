@@ -15,17 +15,17 @@ locals {
   airflow_base_values = {
     images = {
       airflow = {
-        repository = format("%s.dkr.ecr.eu-west-1.amazonaws.com", var.aws_account_id)/airflow
+        repository = "${var.aws_account_id}.dkr.ecr.eu-west-1.amazonaws.com/airflow"
       }
       flower = {
-        repository = format("%s.dkr.ecr.eu-west-1.amazonaws.com", var.aws_account_id)/airflow
+        repository = "${var.aws_account_id}.dkr.ecr.eu-west-1.amazonaws.com/airflow"
         
       }
       redis = {
-        repository = format("%s.dkr.ecr.eu-west-1.amazonaws.com", var.aws_account_id)/redis
+        repository = "${var.aws_account_id}.dkr.ecr.eu-west-1.amazonaws.com/redis"
       }
-      celery = {
-        repository = format("%s.dkr.ecr.eu-west-1.amazonaws.com", var.aws_account_id)/airflow
+      statsd = {
+        repository = "${var.aws_account_id}.dkr.ecr.eu-west-1.amazonaws.com/prometheus/statsd-exporter"
       }
     }
 
@@ -41,13 +41,36 @@ locals {
       }
       
     }
+    logs = {
+      persistence = {
+        storageClassName = "gp2"
+      }
+    }
     data = {
       brokerUrlSecretName = "airflow-broker-url"
+      metadataSecretName  = "custom-airflow-metadata-secret"
+
     }
     postgresql = {
-      enabled = false
+      enabled = true
+      imaage = {
+        repository = "${var.aws_account_id}.dkr.ecr.eu-west-1.amazonaws.com/postgresql"
+      }
+      global = {
+        storageClass = "gp2"
+        postgresql = {
+          auth = {
+            database = "postgres"
+            existingSecret = "airflow-postgresql-secret"
+            secretKeys = {
+              adminPasswordKey = "password"
+              userPasswordKey = "username"
+              replicationPasswordKey = "password"
+            }
+          }
+        }
+      }
     }
-
     flower = {
       enabled      = true
       tolerations  = local.airflow_tolerations
@@ -58,22 +81,38 @@ locals {
       replicas     = 2
       tolerations  = local.airflow_tolerations
       nodeSelector = local.airflow_node_selector
+      persistence = {
+        storageClassName = "gp2"
+        size = "20Gi"
+      }
+      waitForMigrations = {
+        enabled = false
+      }
     }
 
-    web = {
-      port         = 8080
+    webserver = {
       tolerations  = local.airflow_tolerations
       nodeSelector = local.airflow_node_selector
+      defaultUser = {
+        password = "${random_password.web_server_auth.result}"
+      }
+      waitForMigrations = {
+        enabled = false
+      }
     }
 
     scheduler = {
       tolerations  = local.airflow_tolerations
       nodeSelector = local.airflow_node_selector
+      waitForMigrations = {
+        enabled = false
+      }
     }
 
     createUserJob = {
       tolerations  = local.airflow_tolerations
       nodeSelector = local.airflow_node_selector
+
     }
 
     migrateDatabaseJob = {
@@ -84,12 +123,19 @@ locals {
     triggerer = {
       tolerations  = local.airflow_tolerations
       nodeSelector = local.airflow_node_selector
+      waitForMigrations = {
+        enabled = false
+      }
+      persistence = {
+        storageClassName = "gp2"
+        size = "20Gi"
+      }
     }
   }
 
   airflow_config = {
-    AIRFLOW__CORE__SQL_ALCHEMY_CONN     = "postgresql+psycopg2://user:pass@host:5432/airflow"
-    AIRFLOW__CELERY__RESULT_BACKEND     = "db+postgresql://user:pass@host:5432/airflow"
-    AIRFLOW__CELERY__BROKER_URL         = "redis://:redis@redis:6379/0"
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN     = "postgresql+psycopg2://postgresql:${random_password.postgres_auth.result}@airflow-postgresql:5432/airflow"
+    AIRFLOW__CELERY__RESULT_BACKEND     = "db+postgresql://postgresql:${random_password.postgres_auth.result}@airflow-postgresql/airflow"
+    AIRFLOW__CELERY__BROKER_URL         = "redis://:${random_password.redis_password.result}@airflow-redis:6379/0"
   }
 }

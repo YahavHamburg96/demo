@@ -1,14 +1,3 @@
-variable "private_subnet_a" {
-  description = "ID of the first private subnet for the EKS node group"
-  type        = string
-  
-}
-variable "private_subnet_b" {
-  description = "ID of the second private subnet for the EKS node group"
-  type        = string
-  
-}
-
 variable "aws_vpc_id" {
   description = "ID of the VPC where the EKS cluster will be created"
   type        = string
@@ -43,6 +32,13 @@ variable "ecr_repositories" {
     "dummy-app" = {}
     "airflow" = {}
     "redis" = {}
+    "prometheus/statsd-exporter" = {}
+    "postgresql" = {}
   }
   
+}
+
+variable "private_subnet_ids" {
+  description = "Map of private subnet IDs by availability zone"
+  type        = list(string)
 }

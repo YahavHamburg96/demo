@@ -46,12 +46,12 @@ resource "aws_vpc_endpoint" "ecr_api" {
   vpc_id            = var.aws_vpc_id
   service_name      = "com.amazonaws.${var.aws_region}.ecr.api"
   vpc_endpoint_type = "Interface"
-  subnet_ids        = [var.private_subnet_a, var.private_subnet_b]
+  subnet_ids        = var.private_subnet_ids
 }
 
 resource "aws_vpc_endpoint" "ecr_dkr" {
   vpc_id        = var.aws_vpc_id
   service_name      = "com.amazonaws.${var.aws_region}.ecr.dkr"
   vpc_endpoint_type = "Interface"
-  subnet_ids        = [var.private_subnet_a, var.private_subnet_b]
+  subnet_ids        = var.private_subnet_ids
 }
