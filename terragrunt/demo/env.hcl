@@ -24,10 +24,14 @@ locals {
   }
 
   # EKS
-  instance_type           = "t3.micro"
+  instance_type           = "t3.medium"
   node_group_min_size     = 2
   node_group_max_size     = 2
   node_group_desired_size = 2
+  airflow_instance_type   = "t3.medium"
+  airflow_node_group_min_size     = 4
+  airflow_node_group_max_size     = 4
+  airflow_node_group_desired_size = 4
   cluster_version         = "1.31"
 
   

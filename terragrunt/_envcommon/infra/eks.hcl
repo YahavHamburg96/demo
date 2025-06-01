@@ -9,15 +9,20 @@ locals {
 
 inputs = {
   project                  = local.environment_vars.locals.project_name
-  private_subnet_a         = dependency.subnets.outputs.private_subnet_a
-  private_subnet_b         = dependency.subnets.outputs.private_subnet_b
+  private_subnet_ids       = dependency.subnets.outputs.private_subnet_ids
+  public_subnet_ids        = dependency.subnets.outputs.public_subnet_ids
   aws_vpc_id               = dependency.vpc.outputs.vpc_id
   instance_type            = local.environment_vars.locals.instance_type
   subnet_cidrs_private     = local.environment_vars.locals.subnet_cidrs_private
   node_group_min_size      = local.environment_vars.locals.node_group_min_size
   node_group_max_size      = local.environment_vars.locals.node_group_max_size
   node_group_desired_size  = local.environment_vars.locals.node_group_desired_size
+  airflow_instance_type            = local.environment_vars.locals.airflow_instance_type
+  airflow_node_group_min_size      = local.environment_vars.locals.airflow_node_group_min_size
+  airflow_node_group_max_size      = local.environment_vars.locals.airflow_node_group_max_size
+  airflow_node_group_desired_size  = local.environment_vars.locals.airflow_node_group_desired_size
   cluster_version          = local.environment_vars.locals.cluster_version
+
   
 }
 
@@ -26,8 +31,8 @@ dependency "subnets" {
   config_path  = "../../network/subnets"
   skip_outputs = false
   mock_outputs = {
-    private_subnet_a = "dummy"
-    private_subnet_b = "dummy"
+    private_subnet_ids = "dummy"
+    public_subnet_ids = "dummy"
   }
 }
 

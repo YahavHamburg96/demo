@@ -5,6 +5,13 @@ variable "helm_create_namespace" {
   
 }
 
+variable "helm_chart_version" {
+  description = "Version of the Helm chart to deploy"
+  type        = string
+  default     = "1.16.0"  # Update this to the desired version of the Airflow Helm chart
+  
+}
+
 variable "k8s_namespace" {
   description = "The Kubernetes namespace where the Helm release will be deployed"
   type        = string

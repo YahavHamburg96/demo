@@ -1,3 +1,8 @@
+resource "random_password" "random_secret_name" {
+  length  = 2
+  special = false
+}
+
 # Generate a random password
 resource "random_password" "db_password" {
   length  = 16
@@ -6,7 +11,7 @@ resource "random_password" "db_password" {
 
 # Store password in AWS Secrets Manager
 resource "aws_secretsmanager_secret" "db_secret" {
-  name = "${var.project}-rds-postgres-password"
+  name = "${var.project}-${random_password.random_secret_name.result}-rds-postgres-password"
 }
 
 resource "aws_secretsmanager_secret_version" "db_secret_version" {
@@ -47,7 +52,7 @@ resource "aws_security_group" "postgres_sg" {
 # Create DB subnet group
 resource "aws_db_subnet_group" "default" {
   name       = "${var.project}-subnet-group"
-  subnet_ids = [var.private_subnet_a, var.private_subnet_b]
+  subnet_ids = var.private_subnet_ids
 
   tags = {
     Name = "${var.project} subnet group"

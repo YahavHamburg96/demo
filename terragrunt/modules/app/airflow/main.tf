@@ -1,8 +1,43 @@
+
+
 resource "kubernetes_namespace" "namespace" {
   metadata {
     name = var.k8s_namespace
     
   }
+}
+
+resource "random_password" "redis_password" {
+  length  = 16
+  special = true
+}
+
+resource "kubernetes_secret" "redis_auth" {
+  metadata {
+    name      = "airflow-redis-auth"
+    namespace = var.k8s_namespace
+  }
+
+  data = {
+    redis-password = base64encode(random_password.redis_password.result)
+  }
+
+  type = "Opaque"
+  depends_on = [ kubernetes_namespace.namespace ]
+}
+
+resource "kubernetes_secret" "broker_url" {
+  metadata {
+    name      = "airflow-broker-url"
+    namespace = var.k8s_namespace
+  }
+
+  data = {
+    broker-url = base64encode("redis://:$(REDIS_PASSWORD)@redis:6379/0")  # template
+  }
+
+  type = "Opaque"
+  depends_on = [ kubernetes_namespace.namespace ]
 }
 
 resource "kubernetes_secret" "airflow_metadata_db" {
@@ -20,31 +55,24 @@ resource "kubernetes_secret" "airflow_metadata_db" {
   depends_on = [ kubernetes_namespace.namespace ]
 }
 
-# Create a local values.yaml file
-resource "local_file" "helm_values" {
-  content  = data.utils_deep_merge_yaml.values[0].output
-  filename = "${path.module}/generated-values.yaml"
-}
 
-resource "null_resource" "helm_deploy" {
-  triggers = {
-    values_content = data.utils_deep_merge_yaml.values[0].output
-    chart_path    = "../../../charts/airflow"
-    namespace     = var.k8s_namespace
+
+resource "helm_release" "airflow" {
+  name       = "airflow"
+  version    = var.helm_chart_version
+  chart      = "airflow"
+  repository = "https://airflow.apache.org"
+  create_namespace = var.helm_create_namespace
+  namespace        = var.k8s_namespace
+
+  values = [yamlencode(local.airflow_base_values)]
+
+  set {
+    name  = "airflow.config"
+    value = jsonencode(local.airflow_config)
   }
 
-  provisioner "local-exec" {
-    command = <<-EOT
-      # Install helm chart using the generated values file
-      helm upgrade --install airflow \
-        ${self.triggers.chart_path} \
-        --namespace ${self.triggers.namespace} ${var.helm_create_namespace ? "--create-namespace" : ""} \
-        --values ${local_file.helm_values.filename} \
-        --debug
-    EOT
-  }
   depends_on = [
-    kubernetes_secret.airflow_metadata_db,
-    local_file.helm_values
+    kubernetes_secret.airflow_metadata_db
   ]
 }

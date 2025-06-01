@@ -1,11 +1,9 @@
-output "private_subnet_a" {
-  description = "The ID of the private subnet in availability zone A"
-  value       = aws_subnet.private_subnet["eu-west-1a"].id
-  
+output "public_subnet_ids" {
+  description = "List of all public subnet IDs"
+  value       = [for subnet in aws_subnet.public_subnet : subnet.id]
 }
 
-output "private_subnet_b" {
-  description = "The ID of the private subnet in availability zone B"
-  value       = aws_subnet.private_subnet["eu-west-1b"].id
-  
+output "private_subnet_ids" {
+  description = "List of all private subnet IDs"
+  value       = [for subnet in aws_subnet.private_subnet : subnet.id]
 }

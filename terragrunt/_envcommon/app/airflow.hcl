@@ -13,7 +13,7 @@ inputs = {
   aws_account_id           = local.environment_vars.locals.aws_account_id
   db_secret_value          = dependency.rds.outputs.db_secret_value
   rds_endpoint             = dependency.rds.outputs.rds_endpoint
- 
+
   
 }
 

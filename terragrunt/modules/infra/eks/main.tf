@@ -2,9 +2,6 @@ data "http" "my_ip" {
   url = "https://checkip.amazonaws.com/"
 }
 
-locals {
-  executor_ip_cidr = "${chomp(data.http.my_ip.body)}/32"
-}
 
 module "eks_al2023" {
   source  = "terraform-aws-modules/eks/aws"
@@ -15,13 +12,22 @@ module "eks_al2023" {
 
   # EKS Addons
   cluster_addons = {
-    coredns                = {}
-    kube-proxy             = {}
-    vpc-cni                = {}
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+    aws-ebs-csi-driver = {
+      most_recent = true
+    }
   }
   
   vpc_id     = var.aws_vpc_id
-  subnet_ids = [var.private_subnet_a, var.private_subnet_b]
+  subnet_ids = concat(var.public_subnet_ids, var.private_subnet_ids)
   eks_managed_node_groups = {
     main = {
       # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
@@ -31,6 +37,27 @@ module "eks_al2023" {
       desired_size = var.node_group_desired_size
       max_size     = var.node_group_max_size
       min_size     = var.node_group_min_size
+      subnet_ids   = var.private_subnet_ids
+    }
+    airflow = {
+      # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
+      instance_types = ["${var.airflow_instance_type}"]  # Free-tier eligible size
+      ami_type       = "AL2_x86_64"
+
+      desired_size = var.airflow_node_group_desired_size
+      max_size     = var.airflow_node_group_max_size
+      min_size     = var.airflow_node_group_min_size
+      subnet_ids   = var.private_subnet_ids
+      labels = {
+        "airflow" = "true"
+      }
+      taints = {
+        dedicated = {
+          key    = "dedicated"
+          value  = "airflow"
+          effect = "NO_SCHEDULE"
+        }
+      }
     }
   }
   enable_cluster_creator_admin_permissions = true
@@ -44,30 +71,3 @@ module "eks_al2023" {
   cluster_enabled_log_types = []      # No log types enabled
   create_cloudwatch_log_group = false
 }
-
-# module "eks" {
-#   source  = "terraform-aws-modules/eks/aws//modules/aws-auth"
-#   version = "~> 20.0"
-
-#   manage_aws_auth_configmap = true
-
-#   aws_auth_roles = [
-#     {
-#       rolearn  = "arn:aws:iam::${var.user_account_id}:role/EKSAdminRole"
-#       username = "eks-admin"
-#       groups   = ["system:masters"]
-#     }
-#   ]
-
-#   aws_auth_users = [
-#     {
-#       userarn  = "${var.user_arn}"
-#       username = "${var.user_name}"
-#       groups   = ["system:masters"]
-#     }
-#   ]
-
-#   aws_auth_accounts = [
-#     "${var.user_account_id}"
-#   ]
-# }

@@ -9,6 +9,8 @@ resource "aws_subnet" "public_subnet" {
 
   tags = {
     Name = "${var.project}-public-subnet-${each.key}"
+    "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/cluster/${var.project}-cluster" = "owned"
   }
 }
 
@@ -21,7 +23,7 @@ resource "aws_eip" "nat_b" {
   domain = "vpc"
 }
 
-# NAT Gateways in Public Subnets
+# # NAT Gateways in Public Subnets
 resource "aws_nat_gateway" "nat_a" {
   allocation_id = aws_eip.nat_a.id
   subnet_id     = aws_subnet.public_subnet[keys(aws_subnet.public_subnet)[0]].id
@@ -92,15 +94,12 @@ resource "aws_route_table" "public" {
   }
 }
 
-# Associate Private Subnets with Their Route Tables
-resource "aws_route_table_association" "private_a" {
-  subnet_id      = aws_subnet.private_subnet[keys(aws_subnet.private_subnet)[0]].id
-  route_table_id = aws_route_table.private_a.id
-}
-
-resource "aws_route_table_association" "private_b" {
-  subnet_id      = aws_subnet.private_subnet[keys(aws_subnet.private_subnet)[1]].id
-  route_table_id = aws_route_table.private_b.id
+# Associate Private Subnets with Their Route Tables - NAT
+resource "aws_route_table_association" "private_assoc" {
+  for_each = aws_subnet.private_subnet
+  
+  subnet_id      = each.value.id
+  route_table_id = each.key == keys(var.subnet_cidrs_private)[0] ? aws_route_table.private_a.id : aws_route_table.private_b.id
 }
 
 # Associate Public Subnet with Route Table (updated for for_each)
