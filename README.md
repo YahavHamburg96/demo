@@ -36,7 +36,7 @@ This is a Python Flask application that interacts with a PostgreSQL database to 
   - `/generate-data`: Generates random data and inserts it into the database. Accepts a `count` query parameter to specify the number of records.
 
 
-### Infrastructure
+## Infrastructure
 
 ### `/terragrunt`
 Contains configurations for managing infrastructure components using Terragrunt. It includes subfolders for different modules and environments.
