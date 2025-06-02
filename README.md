@@ -1,4 +1,3 @@
-https://a6f7ae1cd9a1a40288b83ac675fa2e45-5e9574b7c12666e5.elb.eu-west-1.amazonaws.com/# 
 
 # Demo Application
 
@@ -18,11 +17,11 @@ This project involves creating an application that generates dummy data and stor
 
 This README provides instructions for setting up the application, deploying the infrastructure, and understanding the functionality of the components.
 
-### Application
+## Application
 
 This is a Python Flask application that interacts with a PostgreSQL database to generate and store random data.
 
-## Key Features
+### Key Features
 
 - **Database Management**:
   - Ensures the specified PostgreSQL database and table (`dummy_data`) exist.
@@ -39,17 +38,15 @@ This is a Python Flask application that interacts with a PostgreSQL database to 
 
 ### Infrastructure
 
-## Folder Structure
-
 ### `/terragrunt`
 Contains configurations for managing infrastructure components using Terragrunt. It includes subfolders for different modules and environments.
 
-#### `_envcommon`
+### `_envcommon`
 Shared configurations reused across multiple environments:
 - **`infra`**: Shared configurations for infrastructure components like RDS, EKS, and ECR.
 - **`app`**: Shared configurations for applications like Airflow and the dummy app.
 
-#### `demo`
+### `demo`
 Environment-specific configurations for the `demo` environment:
 - **`network`**: Manages networking resources (VPC, subnets, etc.).
 - **`infra`**: Manages infrastructure resources (RDS, EKS, ECR, etc.).
@@ -72,7 +69,7 @@ Application-specific configurations for the demo environment:
 - **`dummy-app`**: Configuration for deploying the dummy app, which generates data and interacts with PostgreSQL.
 - **`nginx`**: Configuration for deploying Nginx as a reverse proxy or load balancer.
 
-## Purpose
+### Purpose
 
 The folder structure is designed to:
 1. **Modularize Infrastructure**: Separate configurations for networking, compute, storage, and applications.
