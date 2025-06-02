@@ -34,6 +34,8 @@ variable "ecr_repositories" {
     "redis" = {}
     "prometheus/statsd-exporter" = {}
     "postgresql" = {}
+    "ingress-nginx/controller" = {}
+    "ingress-nginx/kube-webhook-certgen" = {}
   }
   
 }

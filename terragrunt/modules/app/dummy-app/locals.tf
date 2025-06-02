@@ -1,29 +1,15 @@
 locals {
-  values = yamlencode({
-    "global" = {
-      imageRegistry = format("%s.dkr.ecr.eu-west-1.amazonaws.com", var.aws_account_id)
-      "security" = {
-        allowInsecureImages = true
-      }
+  image_registry = format("%s.dkr.ecr.eu-west-1.amazonaws.com", var.aws_account_id)
+
+  dummy_app_base_values = {
+    image = {
+      repository = "${local.image_registry}/dummy-app"
+      tag        = "latest"
     }
-    workers = {
-      logGroomerSidecar = {
-        enabled = false
-      }
+    database = {
+      secretName = "postgresql-secret"
     }
-    migrateDatabaseJob = {
-      enabled = false
-    }
-    data = {
-      metadataSecretName = "custom-dummy-app-metadata-secret"
-    }
-    images = {
-      dummy-app = {
-        repository = format("%s.dkr.ecr.eu-west-1.amazonaws.com/dummy-app", var.aws_account_id)
-      }
-      redis = {
-        repository = format("%s.dkr.ecr.eu-west-1.amazonaws.com/redis", var.aws_account_id)
-      }
-    }
-  })
+
+  }
+
 }

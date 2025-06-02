@@ -29,8 +29,7 @@ dependency "subnets" {
   config_path  = "../../network/subnets"
   skip_outputs = false
   mock_outputs = {
-    private_subnet_a = "dummy"
-    private_subnet_b = "dummy"
+    private_subnet_ids = "dummy"
   }
 }
 

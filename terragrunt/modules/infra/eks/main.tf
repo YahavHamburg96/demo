@@ -1,7 +1,33 @@
+
+# Cluster access Only
 data "http" "my_ip" {
   url = "https://checkip.amazonaws.com/"
 }
 
+
+resource "aws_security_group" "alb" {
+  name        = "${var.project}-alb-sg"
+  description = "Allow HTTP/HTTPS from user"
+  vpc_id      = var.aws_vpc_id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project}-alb-sg"
+  }
+}
 
 module "eks_al2023" {
   source  = "terraform-aws-modules/eks/aws"
@@ -76,3 +102,14 @@ module "eks_al2023" {
   cluster_enabled_log_types = []      # No log types enabled
   create_cloudwatch_log_group = false
 }
+
+
+resource "aws_security_group_rule" "allow_alb_to_nodes_https" {
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.alb.id
+  security_group_id        = module.eks_al2023.node_security_group_id
+}
+

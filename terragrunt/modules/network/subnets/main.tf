@@ -10,7 +10,7 @@ resource "aws_subnet" "public_subnet" {
   tags = {
     Name = "${var.project}-public-subnet-${each.key}"
     "kubernetes.io/role/elb" = "1"
-    "kubernetes.io/cluster/${var.project}-cluster" = "owned"
+    "kubernetes.io/cluster/${var.project}" = "owned"
   }
 }
 
@@ -52,7 +52,7 @@ resource "aws_subnet" "private_subnet" {
   tags = {
     Name = "${var.project}-private-subnet-${each.key}"
     "kubernetes.io/role/internal-elb" = "1"
-    "kubernetes.io/cluster/${var.project}-cluster" = "owned"
+    "kubernetes.io/cluster/${var.project}" = "owned"
   }
 }
 # Private Route Tables for Each AZ

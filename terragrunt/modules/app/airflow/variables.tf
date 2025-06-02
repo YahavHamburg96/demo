@@ -42,15 +42,4 @@ variable "aws_account_id" {
   
 }
 
-variable "rds_endpoint" {
-  description = "Endpoint of the RDS instance for Airflow metadata database"
-  type        = string
-  
-}
 
-variable "db_secret_value" {
-  description = "Secret value for the Airflow metadata database"
-  type        = string
-  sensitive   = true
-  
-}

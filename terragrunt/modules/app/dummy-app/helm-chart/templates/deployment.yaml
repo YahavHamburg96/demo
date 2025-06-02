@@ -36,6 +36,23 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: "{{ .Values.database.secretName }}"
+                key: "host"
+          - name: DB_PORT
+            value: "{{ .Values.database.port | default "5432" }}"
+          - name: DB_NAME
+            value: "{{ .Values.database.name | default "postgres" }}"
+          - name: DB_USER
+            value: "{{ .Values.database.user | default "postgresadmin" }}"
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: "{{ .Values.database.secretName }}"
+                key: "password"
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

@@ -22,7 +22,7 @@ if not all([DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS]):
 def ensure_database_exists():
     # Connect to the default 'postgres' database to check if DB exists
     conn = psycopg2.connect(
-        host=DB_HOST, port=DB_PORT, dbname='postgres', user=DB_USER, password=DB_PASS
+        host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USER, password=DB_PASS
     )
     conn.autocommit = True
     cur = conn.cursor()
@@ -37,6 +37,25 @@ def ensure_database_exists():
     cur.close()
     conn.close()
 
+def ensure_table_exists():
+    conn = psycopg2.connect(
+        host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USER, password=DB_PASS
+    )
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS dummy_data (
+            id UUID PRIMARY KEY,
+            name TEXT,
+            email TEXT,
+            address TEXT,
+            amount NUMERIC,
+            timestamp TIMESTAMP
+        )
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
+    
 def insert_into_postgres(records):
     conn = psycopg2.connect(
         host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USER, password=DB_PASS
@@ -51,6 +70,11 @@ def insert_into_postgres(records):
     conn.commit()
     cur.close()
     conn.close()
+
+@app.route('/')
+@app.route('/health')
+def health():
+    return jsonify({'status': 'ok'}), 200
 
 @app.route('/generate-data', methods=['GET'])
 def generate_data():
@@ -71,4 +95,5 @@ def generate_data():
 
 if __name__ == '__main__':
     ensure_database_exists()
-    app.run(port=5000, debug=True)
+    ensure_table_exists()
+    app.run(host="0.0.0.0",port=5000, debug=False)
